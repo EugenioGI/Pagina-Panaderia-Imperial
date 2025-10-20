@@ -1,0 +1,236 @@
+:root {
+    --green: #0b8043;
+    --card-bg: #ffffff;
+    --accent: #2b7a4b;
+    --muted: #9aa3a6;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    background: #f6f6f7;
+    color: #222;
+}
+
+.topbar {
+    background: var(--green);
+    color: #fff;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.topbar .title {
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.container {
+    padding: 18px;
+    max-width: 1200px;
+    margin: 18px auto;
+}
+
+.hoja_informacion {
+    margin-top: 10px;
+    margin-left: 10px;
+    display: inline-block;
+    background-color: rgb(253, 253, 253); 
+    
+    color: #000000;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.hoja_informacion:hover {
+    background-color: var(--green); /* Color al pasar el mouse */
+    color: #ffffff;
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, .06);
+    overflow: hidden;
+}
+
+.table-wrap {
+    padding: 12px 14px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+thead th {
+    background: #f1f6f3;
+    color: #333;
+    text-align: left;
+    padding: 12px 10px;
+    font-weight: 600;
+    font-size: .95rem;
+    border-bottom: 1px solid #e6e6e6;
+}
+
+tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+th.col-star, td.col-star {
+    width: 40px;
+    text-align: center;
+}
+
+th.index, td.index {
+    width: 40px;
+    text-align: center;
+    color: var(--muted);
+}
+
+.cell {
+    min-height: 28px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    outline: none;
+}
+
+.cell[contenteditable="true"] {
+    cursor: text;
+}
+
+.cell:empty:before {
+    content: attr(data-placeholder);
+    color: #bdbdbd;
+    pointer-events: none;
+}
+
+.controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn.ghost {
+    background: #fff;
+    color: var(--accent);
+    border: 1px solid #dcdcdc;
+}
+
+.tabs {
+    display: flex;
+    gap: 8px;
+    padding: 12px 14px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    align-items: center;
+}
+
+.tab-btn {
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.tab-btn.active {
+    background: #f1f6f3;
+    color: var(--accent);
+}
+
+.section {
+    display: none;
+    padding: 14px;
+}
+
+.section.active {
+    display: block;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.form-row input,
+.form-row textarea,
+.display-field {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fafafa;
+}
+
+.display-field[aria-readonly="true"] {
+    background: #fff;
+}
+
+.small {
+    font-size: .9rem;
+    color: var(--muted);
+}
+
+.note {
+    font-size: .85rem;
+    color: var(--muted);
+    margin-top: 8px;
+}
+
+/* nuevos estilos para reporte de ventas */
+#ventasSummary {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.day-row {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    background: #fff;
+}
+
+.day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.day-total {
+    font-weight: 700;
+}
+
+.notes-list {
+    margin-top: 8px;
+    font-size: .95rem;
+    color: #333;
+}
+
+.small-muted {
+    font-size: .85rem;
+    color: #666;
+}

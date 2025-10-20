@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>- Inventario (editable)</title>
+    <link rel="stylesheet" href="Jefe.css">
+</head>
+<body>
+    <div class="topbar">
+        <div class="title">Inventario de Panadería</div>
+        <div class="user">Usuario: <strong id="userName">...</strong></div>
+        <a class="hoja_informacion" href="Informacion_Jefe.html">Informacion</a>
+    </div>
+    
+
+    <div class="container">
+        <div class="card">
+            <!-- pestañas de navegación -->
+            <div class="tabs" role="tablist" aria-label="Pestañas de sección">
+                <button class="tab-btn active" data-target="tab-inv" role="tab">Inventario</button>
+                <button class="tab-btn" data-target="tab-prod" role="tab">Reporte de producción</button>
+                <button class="tab-btn" data-target="tab-ventas" role="tab">Reporte de ventas</button>
+                <div style="margin-left:auto;" class="controls">
+                    <button id="addRow" class="btn">Añadir fila</button>
+                    <button id="logoutBtn" class="btn ghost">Cerrar sesión</button>
+                </div>
+            </div>
+
+            <!-- Inventario  -->
+            <div id="tab-inv" class="section active">
+                <div class="table-wrap">
+                    <table aria-label="Tabla de inventario editable">
+                        <thead>
+                            <tr>
+                                <th class="index">#</th>    
+                                <th>Nombre de insumo</th>
+                                <th>Cantidad de unidades</th>
+                                <th>Unidad</th>
+                                <th>Fecha de compra de insumo</th>
+                                <th>Fecha de caducidad de insumo</th>
+                                <th>Cantidad existente</th>
+                                <th>Cantidad de insumo utilizados</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody">
+                            <tr>
+                                <td class="index">1</td>
+                                <td><div class="cell" contenteditable="true" data-placeholder="Harina, azucar etc..."></div></td>
+                                <td><div class="cell" contenteditable="true" data-placeholder="1,2...10"></div></td>
+                                <td><div class="cell" contenteditable="true" data-placeholder="Kg, L, piezas"></div></td>
+                                <td><div class="cell" contenteditable="true" data-placeholder="DD/MM/YYYY"></div></td>
+                                <td><div class="cell" contenteditable="true" data-placeholder="DD/MM/YYYY"></div></td>
+                                <td><div class="cell" contenteditable="true" data-placeholder="1,2,...10"></div></td>
+                                <td><div class="cell" contenteditable="true" data-placeholder="1,2,...10"></div></td>
+                            </tr>
+                            <tr>
+                                <td class="index">2</td>
+                               <td><div class="cell" contenteditable="true" data-placeholder="Harina, azucar etc..."></div></td>
+                                <td><div class="cell" contenteditable="true" data-placeholder="1,2...10"></div></td>
+                                <td><div class="cell" contenteditable="true" data-placeholder="Kg, L, piezas"></div></td>
+                                <td><div class="cell" contenteditable="true" data-placeholder="DD/MM/YYYY"></div></td>
+                                <td><div class="cell" contenteditable="true" data-placeholder="DD/MM/YYYY"></div></td>
+                                <td><div class="cell" contenteditable="true" data-placeholder="1,2,...10"></div></td>
+                                <td><div class="cell" contenteditable="true" data-placeholder="1,2,...10"></div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="padding:12px 14px;" class="Alerts">Edita las celdas directamente.</div>
+                <!-- Sección de Alertas recibidas desde el panadero -->
+                <div style="padding:12px 14px;">
+                    <h4>Alertas recibidas</h4>
+                    <div style="display:flex;gap:8px;margin-bottom:8px;">
+                        <button id="loadAlerts" class="btn">Cargar alertas</button>
+                        <button id="clearAlerts" class="btn ghost" title="Borrar alertas">Borrar alertas</button>
+                        <div style="margin-left:auto;" class="small-muted">Total: <strong id="alertsCount">0</strong></div>
+                    </div>
+                    <div id="alertsList" style="max-height:180px; overflow:auto; border:1px solid #e6e6e6; padding:8px; background:#fff;"></div>
+                </div>
+
+                <!-- Sección: Inventarios guardados (historial / consulta) -->
+                <div id="savedInventoriesWrap" style="padding:12px 14px; border-top:1px solid #eee; background:#fafafa;">
+                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                        <h4 style="margin:0;">Inventarios guardados</h4>
+                        <div style="margin-left:auto; display:flex; gap:8px;">
+                            <button id="loadSavedInv" class="btn">Cargar guardados</button>
+                            <button id="clearSavedInv" class="btn ghost" title="Borrar historial">Borrar historial</button>
+                        </div>
+                    </div>
+                    <div id="savedInventoriesList" style="max-height:240px; overflow:auto; border:1px solid #e6e6e6; padding:8px; background:#fff;"></div>
+                </div>
+            </div>
+
+            <!--Reporte de producción -->
+            <div id="tab-prod" class="section" aria-hidden="true">
+                <h3>Reporte de producción</h3>
+                <div class="small" style="margin-bottom:8px;">Consulta el historial de reportes generados por el panadero. Se muestran totales por día y un acumulado.</div>
+
+                <div style="margin-bottom:8px;">
+                    <div id="prodSummary" style="display:flex; gap:12px; align-items:center;">
+                        <button id="loadProdHist" class="btn">Cargar historial</button>
+                        <button id="clearProdHist" class="btn ghost" title="Borrar historial (local)">Borrar historial</button>
+                        <button id="exportProdReport" class="btn">Generar reporte</button>
+                        <div style="margin-left:auto;" class="small-muted">Total histórico: <strong id="prodGrandTotal">0</strong></div>
+                    </div>
+                </div>
+
+                <div id="prodList" style="max-height:420px; overflow:auto; border:1px solid #e6e6e6; padding:10px; background:#fff;">
+                    <!-- Lista de días con totales y reportes-->
+                </div>
+                <div id="prod-msg" class="note"></div>
+            </div>
+
+            <!-- Sección Reporte de ventas -->
+            <div id="tab-ventas" class="section" aria-hidden="true">
+                <h3>Reporte de ventas (consulta)</h3>
+                <div class="small" style="margin-bottom:8px;">Consulta el historial de notas registradas por el cajero. Se muestran totales por día y un acumulado.</div>
+
+                <div style="margin-bottom:8px;">
+                    <div id="ventasSummary">
+                <button id="loadVentas" class="btn">Cargar historial</button>
+                <button id="clearVentas" class="btn ghost" title="Borrar historial (local)">Borrar historial</button>
+                <button id="exportReport" class="btn">Generar reporte</button>
+                <div style="margin-left:auto;" class="small-muted">Total histórico: <strong id="grandTotal">$0.00</strong></div>
+            </div>
+
+                    <div id="ventasList" style="max-height:420px; overflow:auto; border:1px solid #e6e6e6; padding:10px; background:#fff;">
+                        <!-- Lista de días con totales y notas -->
+                    </div>
+                </div>
+                <div id="ventas-msg" class="note"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getSession, requireUser, logout } from './auth.js';
+
+        // proteger acceso
+        requireUser('Jefe');
+        const s = getSession();
+        const username = s?.username ?? 'Jefe';
+        document.getElementById('userName').textContent = username;
+
+        // pestañas
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const sections = document.querySelectorAll('.section');
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabButtons.forEach(b => b.classList.remove('active'));
+                sections.forEach(sec => sec.classList.remove('active'));
+                const target = document.getElementById(btn.dataset.target);
+                btn.classList.add('active');
+                target.classList.add('active');
+
+                // al activar pestaña de reportes, cargar automáticamente último si existe
+                if (btn.dataset.target === 'tab-prod') loadProd();
+                if (btn.dataset.target === 'tab-ventas') loadVentas();
+                if (btn.dataset.target === 'tab-inv') loadAlerts();
+            });
+        });
+
+        // añadir fila inventario
+        const tbody = document.getElementById('tbody');
+        document.getElementById('addRow').addEventListener('click', () => {
+            const index = tbody.querySelectorAll('tr').length + 1;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="index">${index}</td>
+                <td><div class="cell" contenteditable="true" data-placeholder="Harina, azucar etc..."></div></td>
+                <td><div class="cell" contenteditable="true" data-placeholder="1,2...10"></div></td>
+                <td><div class="cell" contenteditable="true" data-placeholder="Kg, L, piezas"></div></td>
+                <td><div class="cell" contenteditable="true" data-placeholder="DD/MM/YYYY"></div></td>
+                <td><div class="cell" contenteditable="true" data-placeholder="DD/MM/YYYY"></div></td>
+                <td><div class="cell" contenteditable="true" data-placeholder="1,2,...10"></div></td>
+                <td><div class="cell" contenteditable="true" data-placeholder="1,2,...10"></div></td>
+            `;
+            tbody.appendChild(tr);
+            tr.querySelector('.cell').focus();
+        });
+
+        // logout
+        document.getElementById('logoutBtn').addEventListener('click', () => logout());
+
+        // keys por usuario
+        const keyProd = `panaderia_prod_${username}`;
+        const keyVentas = `panaderia_ventas_${username}`;
+        const keyAlerts = `panaderia_alerts`; // global alerts key (shared)
+
+        function showMsg(el, text, ok=true){
+            el.textContent = text;
+            el.style.color = ok ? '#1b6b2f' : '#c00';
+            setTimeout(()=> el.textContent = '', 4000);
+        }
+        
+        // Cargar alertas enviadas por panadero
+        function loadAlerts(){
+            const listEl = document.getElementById('alertsList');
+            const countEl = document.getElementById('alertsCount');
+            listEl.innerHTML = '';
+            countEl.textContent = '0';
+            const raw = localStorage.getItem('panaderia_alerts');
+            if (!raw) {
+                listEl.innerHTML = '<div class="small-muted">No hay alertas.</div>';
+                return;
+            }
+            try {
+                const arr = JSON.parse(raw);
+                if (!arr.length) { listEl.innerHTML = '<div class="small-muted">No hay alertas.</div>'; return; }
+                // mostrar más reciente primero
+                arr.slice().reverse().forEach(a=>{
+                    const d = document.createElement('div');
+                    d.style.borderTop = '1px dashed #eee';
+                    d.style.padding = '8px 6px';
+                    d.innerHTML = `<div style="font-weight:600">${a.user || 'panadero'} — ${a.date || ''}</div>
+                                   <div style="margin-top:6px;color:#444">${(a.message||'').replace(/\n/g,'<br>')}</div>`;
+                    listEl.appendChild(d);
+                });
+                countEl.textContent = String(arr.length);
+            } catch(e){
+                console.error(e);
+                document.getElementById('alertsList').innerHTML = '<div class="small-muted">Error leyendo alertas.</div>';
+            }
+        }
+
+        // botones de alertas
+        document.getElementById('loadAlerts').addEventListener('click', loadAlerts);
+        document.getElementById('clearAlerts').addEventListener('click', ()=> {
+            if (!confirm('Borrar todas las alertas recibidas?')) return;
+            localStorage.removeItem('panaderia_alerts');
+            document.getElementById('alertsList').innerHTML = '';
+            document.getElementById('alertsCount').textContent = '0';
+            showMsg(document.getElementById('prod-msg'), 'Alertas borradas.'); // usa un msg visible
+        });
+
+        // Cargar último reporte de producción
+        function loadProd(){
+            const elMsg = document.getElementById('prod-msg');
+            
+            const raw = localStorage.getItem('panaderia_production_reports');
+            document.getElementById('prod-fecha').value = '';
+            document.getElementById('prod-turno').value = '';
+            document.getElementById('prod-detalle').value = '';
+            if (!raw) {
+                showMsg(elMsg, 'No hay reporte de producción disponible.', false);
+                return;
+            }
+            try {
+                const arr = JSON.parse(raw);
+                if (!arr.length) { showMsg(elMsg, 'No hay reporte de producción disponible.', false); return; }
+                const last = arr[arr.length - 1];
+                document.getElementById('prod-fecha').value = last.date || '';
+                document.getElementById('prod-turno').value = last.turno || '';
+                const detalle = (last.items || []).map(it=>{
+                    return `${it.cantidadPan || 0} × ${it.pan || ''} — Mat: ${it.materiaPrima || ''} (${it.cantidadMateria || 0}) — Merma: ${it.merma || ''}${it.detalleMerma ? ' ('+it.detalleMerma+')' : ''}`;
+                }).join('\\n');
+                document.getElementById('prod-detalle').value = detalle;
+                showMsg(elMsg, 'Último reporte de producción cargado.');
+            } catch (e) {
+                console.error(e);
+                showMsg(elMsg, 'Error al leer el reporte.', false);
+            }
+        }
+
+        // Cargar historial de notas guardadas 
+        function parseInvoiceDate(dateStr){
+            
+            if(!dateStr) return null;
+            const s = dateStr.replace(/\s/g,'').replace(/\//g,'/');
+            const parts = s.split('/');
+            if(parts.length !== 3) return null;
+            const dd = parseInt(parts[0],10), mm = parseInt(parts[1],10)-1, yy = parseInt(parts[2],10);
+            return new Date(yy, mm, dd);
+        }
+
+        function fmtDateKey(dateStr, invCreated){
+            
+            const d = parseInvoiceDate(dateStr) || (invCreated ? new Date(invCreated) : null);
+            if(!d) return 'Sin fecha';
+            const dd = String(d.getDate()).padStart(2,'0');
+            const mm = String(d.getMonth()+1).padStart(2,'0');
+            const yy = d.getFullYear();
+            return `${dd} / ${mm} / ${yy}`;
+        }
+
+        function loadVentas(){
+            const elMsg = document.getElementById('ventas-msg');
+            const listEl = document.getElementById('ventasList');
+            const grandEl = document.getElementById('grandTotal');
+            listEl.innerHTML = '';
+            grandEl.textContent = '$0.00';
+            const raw = localStorage.getItem('panaderia_invoices');
+            if (!raw) {
+                showMsg(elMsg, 'No hay notas registradas.', false);
+                return;
+            }
+            try {
+                const arr = JSON.parse(raw);
+                if (!arr.length) { showMsg(elMsg, 'No hay notas registradas.', false); return; }
+
+                // agrupar por fecha
+                const map = {};
+                arr.forEach(inv=>{
+                    const key = fmtDateKey(inv.date, inv.createdAt);
+                    if(!map[key]) map[key] = { total:0, notes:[] };
+                    map[key].total += Number(inv.total || 0);
+                    map[key].notes.push(inv);
+                });
+
+                // ordenar fechas descendentes
+                const keys = Object.keys(map).sort((a,b)=>{
+                    const da = parseInvoiceDate(a) || new Date(0);
+                    const db = parseInvoiceDate(b) || new Date(0);
+                    return db - da;
+                });
+
+                // calcular acumulado
+                let acumulado = 0;
+                let grandTotal = 0;
+                keys.forEach(key=>{
+                    const day = map[key];
+                    grandTotal += day.total;
+                });
+
+                // mostrar gran total
+                grandEl.textContent = '$' + Number(grandTotal).toFixed(2);
+
+                // de mayor a menor
+                keys.forEach(key=>{
+                    const day = map[key];
+                    acumulado += day.total; 
+                    const container = document.createElement('div');
+                    container.className = 'day-row';
+                    const header = document.createElement('div');
+                    header.className = 'day-header';
+                    header.innerHTML = `<div><strong>${key}</strong> — ${day.notes.length} nota(s)</div>
+                                        <div><span class="day-total">Total: $${Number(day.total).toFixed(2)}</span>
+                                        <span class="small-muted" style="margin-left:12px;">Acumulado: $${Number(acumulado).toFixed(2)}</span></div>`;
+                    container.appendChild(header);
+
+                    const notesDiv = document.createElement('div');
+                    notesDiv.className = 'notes-list';
+                    // detalle de cada nota del día
+                    day.notes.slice().reverse().forEach(inv=>{
+                        const invDiv = document.createElement('div');
+                        invDiv.style.padding = '6px 0';
+                        invDiv.style.borderTop = '1px dashed #eee';
+                        const itemsText = inv.items.map(it=>`${it.qty}×${it.product} || ${Number(it.price).toFixed(2)} = ${Number(it.subtotal).toFixed(2)}`).join(' — ');
+                        invDiv.innerHTML = `<div style="font-weight:600">No. ${inv.no} — Total: $${Number(inv.total).toFixed(2)} — ${inv.date || ''}</div>
+                                            <div style="font-size:.92rem; color:#444; margin-top:4px">${itemsText}</div>`;
+                        notesDiv.appendChild(invDiv);
+                    });
+                    container.appendChild(notesDiv);
+                    listEl.appendChild(container);
+                });
+
+                showMsg(elMsg, 'Historial cargado (' + arr.length + ' notas).');
+            } catch (e) {
+                console.error(e);
+                showMsg(elMsg, 'Error al leer historial.', false);
+            }
+        }
+
+        // Cargar historial de reportes de producción guardados
+        function loadProdHist(){
+            const elMsg = document.getElementById('prod-msg');
+            const listEl = document.getElementById('prodList');
+            const grandEl = document.getElementById('prodGrandTotal');
+            listEl.innerHTML = '';
+            grandEl.textContent = '0';
+
+            const raw = localStorage.getItem('panaderia_production_reports');
+            if (!raw) {
+                showMsg(elMsg, 'No hay reportes de producción registrados.', false);
+                return;
+            }
+            try {
+                const arr = JSON.parse(raw);
+                if (!arr.length) { showMsg(elMsg, 'No hay reportes de producción registrados.', false); return; }
+
+                // agrupar por fecha
+                const map = {};
+                let grandPieces = 0;
+                arr.forEach(rep=>{
+                    const key = fmtDateKey(rep.date, rep.createdAt);
+                    if(!map[key]) map[key] = { pieces:0, reports:[] };
+
+                    // normalizar arrays (producción puede venir en rep.production o rep.items)
+                    const production = Array.isArray(rep.production) ? rep.production
+                                      : Array.isArray(rep.items) ? rep.items.map(it=>({ pan: it.pan || it.product || '', cantidadPan: it.cantidadPan || it.qty || 0 }))
+                                      : [];
+
+                    const materials = Array.isArray(rep.materials) ? rep.materials : [];
+
+                    const repPieces = production.reduce((s,it)=>s + Number(it.cantidadPan || 0),0);
+                    map[key].pieces += repPieces;
+                    grandPieces += repPieces;
+
+                    // guardar report normalizado
+                    map[key].reports.push(Object.assign({}, rep, { production, materials }));
+                });
+
+                const keys = Object.keys(map).sort((a,b)=>{
+                    const da = parseInvoiceDate(a) || new Date(0);
+                    const db = parseInvoiceDate(b) || new Date(0);
+                    return db - da;
+                });
+
+                // renderizar similar a reportes de ventas
+                keys.forEach(key=>{
+                    const day = map[key];
+                    const container = document.createElement('div');
+                    container.className = 'day-row';
+                    const header = document.createElement('div');
+                    header.className = 'day-header';
+                    header.innerHTML = `<div><strong>${key}</strong> — ${day.reports.length} reporte(s)</div>
+                                        <div><span class="day-total">Piezas: ${Number(day.pieces).toFixed(0)}</span></div>`;
+                    container.appendChild(header);
+
+                    const reportsDiv = document.createElement('div');
+                    reportsDiv.className = 'notes-list';
+                    day.reports.slice().reverse().forEach(rep=>{
+                        const repDiv = document.createElement('div');
+                        repDiv.style.padding = '6px 0';
+                        repDiv.style.borderTop = '1px dashed #eee';
+
+                        // texto de producción
+                        const prodText = (rep.production || []).map(it=>{
+                            return `${it.cantidadPan || 0}×${it.pan || ''}`;
+                        }).join(' — ');
+
+                        // texto de materias primas
+                        const matText = (rep.materials || []).map(m=>{
+                            const unidad = m.unidad ? ` ${m.unidad}` : '';
+                            return `${m.materiaPrima || ''}${unidad} | ${m.cantidadMateria || 0} — Merma: ${m.merma || 0}${m.detalleMerma ? ' ('+m.detalleMerma+')' : ''}`;
+                        }).join(' · ');
+
+                        repDiv.innerHTML = `<div style="font-weight:600">No. ${rep.no || '-'} — ${rep.date || ''}</div>
+                                            <div style="font-size:.92rem; color:#444; margin-top:4px">${prodText || '<em>Sin producción</em>'}</div>
+                                            <div style="font-size:.9rem; color:#666; margin-top:6px"><strong>Materia prima:</strong> ${matText || '<em>Sin materia prima</em>'}</div>`;
+                        reportsDiv.appendChild(repDiv);
+                    });
+                    container.appendChild(reportsDiv);
+                    listEl.appendChild(container);
+                });
+
+                grandEl.textContent = String(grandPieces);
+                showMsg(elMsg, 'Historial de producción cargado (' + arr.length + ' reportes).');
+            } catch (e) {
+                console.error(e);
+                showMsg(document.getElementById('prod-msg'), 'Error al leer historial de producción.', false);
+            }
+        }
+
+        // borrar historial de producción
+        document.getElementById('clearProdHist').addEventListener('click', ()=>{
+            if (!confirm('Borrar historial de reportes de producción guardados localmente?')) return;
+            localStorage.removeItem('panaderia_production_reports');
+            document.getElementById('prodList').innerHTML = '';
+            document.getElementById('prodGrandTotal').textContent = '0';
+            showMsg(document.getElementById('prod-msg'), 'Historial de producción borrado.');
+        });
+
+        // botón cargar historial de producción
+        document.getElementById('loadProdHist').addEventListener('click', loadProdHist);
+
+        // Generar reporte descargable (CSV) de las notas guardadas, con total acumulado
+        document.getElementById('exportReport').addEventListener('click', () => {
+            const raw = localStorage.getItem('panaderia_invoices');
+            const msgEl = document.getElementById('ventas-msg');
+            if (!raw) {
+                showMsg(msgEl, 'No hay notas para generar reporte.', false);
+                return;
+            }
+            try {
+                const arr = JSON.parse(raw);
+                if (!arr.length) { showMsg(msgEl, 'No hay notas para generar reporte.', false); return; }
+
+                // construir CSV: Fecha, Tipo de pan, Cantidad, Precio unitario, Subtotal, Total nota
+                const lines = [];
+                lines.push('Fecha,Tipo de pan,Cantidad,Precio unitario,Subtotal,Total nota');
+                let grand = 0;
+
+                arr.forEach(inv => {
+                    const invTotal = Number(inv.total || 0);
+                    grand += invTotal;
+
+                    // si hay items, agregar una fila por item incluyendo el total de la nota en la última columna
+                    if (Array.isArray(inv.items) && inv.items.length) {
+                        inv.items.forEach(it => {
+                            const date = (inv.date || '').replace(/"/g, '""');
+                            const product = (it.product || '').replace(/"/g, '""');
+                            const qty = Number(it.qty || 0);
+                            const price = Number(it.price || 0);
+                            const subtotal = Number(it.subtotal || 0);
+                            lines.push(`"${date}","${product}",${qty},${price.toFixed(2)},${subtotal.toFixed(2)},"${invTotal.toFixed(2)}"`);
+                        });
+                    } else {
+                        // nota sin items: fila con total
+                        const date = (inv.date || '').replace(/"/g, '""');
+                        lines.push(`"${date}","","",0.00,0.00,"${invTotal.toFixed(2)}"`);
+                    }
+                });
+
+                // línea final con total acumulado
+                lines.push(`"Grand Total",,, , ,${grand.toFixed(2)}`);
+
+                const csv = lines.join('\r\n');
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const now = new Date();
+                const fn = `reporte_ventas_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.csv`;
+                a.href = url;
+                a.download = fn;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                showMsg(msgEl, `Reporte generado (${arr.length} notas). Archivo: ${fn}`);
+            } catch (e) {
+                console.error(e);
+                showMsg(document.getElementById('ventas-msg'), 'Error al generar reporte.', false);
+            }
+        });
+
+        // generar CSV de producción (export) — ahora combina production y materials en filas paralelas
+        document.getElementById('exportProdReport').addEventListener('click', ()=>{
+            const raw = localStorage.getItem('panaderia_production_reports');
+            const msgEl = document.getElementById('prod-msg');
+            if (!raw) { showMsg(msgEl, 'No hay reportes para generar reporte.', false); return; }
+            try {
+                const arr = JSON.parse(raw);
+                if (!arr.length) { showMsg(msgEl, 'No hay reportes para generar reporte.', false); return; }
+                const lines = [];
+                lines.push('Fecha,Tipo de pan,Cantidad producida,Tipo materia prima,Cantidad materia prima,Merma,Detalle de merma');
+                let totalPieces = 0;
+                arr.forEach(rep=>{
+                    const date = (rep.date || '').replace(/"/g,'""');
+
+                    const production = Array.isArray(rep.production) ? rep.production
+                                      : Array.isArray(rep.items) ? rep.items.map(it=>({ pan: it.pan || it.product || '', cantidadPan: it.cantidadPan || it.qty || 0 }))
+                                      : [];
+
+                    const materials = Array.isArray(rep.materials) ? rep.materials : [];
+
+                    const max = Math.max(production.length, materials.length);
+                    if (max === 0) {
+                        lines.push(`"${date}","","","",0,,""`);
+                    } else {
+                        for(let i=0;i<max;i++){
+                            const p = production[i];
+                            const m = materials[i];
+                            const pan = p ? (p.pan || '').replace(/"/g,'""') : '';
+                            const qty = p ? Number(p.cantidadPan || 0) : 0;
+                            const mat = m ? (m.materiaPrima || '').replace(/"/g,'""') : '';
+                            const matQty = m ? Number(m.cantidadMateria || 0) : 0;
+                            const merma = m ? (m.merma || '').replace(/"/g,'""') : '';
+                            const det = m ? (m.detalleMerma || '').replace(/"/g,'""') : '';
+                            totalPieces += qty;
+                            lines.push(`"${date}","${pan}",${qty},"${mat}",${matQty},"${merma}","${det}"`);
+                        }
+                    }
+                });
+                lines.push(`"Grand Total",,,${totalPieces},,`);
+                const csv = lines.join('\r\n');
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const now = new Date();
+                const fn = `reporte_produccion_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.csv`;
+                a.href = url; a.download = fn; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+                showMsg(msgEl, `Reporte generado (${arr.length} reportes). Archivo: ${fn}`);
+            } catch (e) {
+                console.error(e);
+                showMsg(document.getElementById('prod-msg'), 'Error al generar reporte.', false);
+            }
+        });
+
+        function saveInventario() {
+  const rows = Array.from(document.querySelectorAll('#tbody tr'));
+  const inventario = rows.map(row => {
+    const cells = row.querySelectorAll('.cell');
+    return {
+      index: cells[0]?.textContent || '',
+      material: cells[1]?.textContent || '',
+      cantidad: cells[2]?.textContent || '',
+      unidad: cells[3]?.textContent || '',
+      fechaCompra: cells[4]?.textContent || '',
+      fechaCaducidad: cells[5]?.textContent || '',
+      existencia: cells[6]?.textContent || ''
+    };
+  });
+
+  localStorage.setItem('panaderia_inventario', JSON.stringify(inventario));
+  showMsg(document.getElementById('inv-msg'), 'Inventario guardado y actualizado para consulta');
+}
+
+// Agregar evento para guardar automáticamente cuando se edita
+document.getElementById('tbody').addEventListener('input', (e) => {
+  if (e.target.classList.contains('cell')) {
+    saveInventario();
+  }
+});
+
+// Agregar botón de guardado manual
+document.querySelector('.controls').insertAdjacentHTML('beforeend', `
+  <button id="saveInvBtn" class="btn">Guardar inventario</button>
+`);
+
+document.getElementById('saveInvBtn').addEventListener('click', saveInventario);
+
+// --- NUEVO: historial de inventarios y renderizado para consulta ---
+// crea un snapshot del inventario (sin tocar saveInventario)
+function buildInventarioSnapshot() {
+  const rows = Array.from(document.querySelectorAll('#tbody tr'));
+  const inventario = rows.map(row => {
+    const cells = row.querySelectorAll('.cell');
+    return {
+      index: row.querySelector('.index')?.textContent || '',
+      material: cells[0]?.textContent || '',
+      cantidad: cells[1]?.textContent || '',
+      unidad: cells[2]?.textContent || '',
+      fechaCompra: cells[3]?.textContent || '',
+      fechaCaducidad: cells[4]?.textContent || '',
+      existencia: cells[5]?.textContent || ''
+    };
+  });
+  return inventario;
+}
+
+// guarda snapshot en historial y actualiza la vista de guardados
+function saveInventarioSnapshot() {
+  try {
+    const snapshot = {
+      id: Date.now(),
+      title: `Inventario ${new Date().toLocaleString()}`,
+      createdAt: Date.now(),
+      items: buildInventarioSnapshot()
+    };
+
+    // historial de inventarios
+    const keyHist = 'panaderia_inventarios';
+    const raw = localStorage.getItem(keyHist);
+    const arr = raw ? JSON.parse(raw) : [];
+    arr.push(snapshot);
+    localStorage.setItem(keyHist, JSON.stringify(arr));
+
+    // mantener compatibilidad: actualizar también la clave que usan las vistas actuales
+    // (no modificamos saveInventario original; aquí repetimos la última versión para que panaderoJefe vea la última)
+    localStorage.setItem('panaderia_inventario', JSON.stringify(snapshot.items));
+
+    renderSavedInventories();
+  } catch (e) {
+    console.error('Error guardando snapshot de inventario', e);
+  }
+}
+
+function renderSavedInventories() {
+  const listEl = document.getElementById('savedInventoriesList');
+  listEl.innerHTML = '';
+  const raw = localStorage.getItem('panaderia_inventarios');
+  if (!raw) {
+    listEl.innerHTML = '<div class="small-muted">No hay inventarios guardados.</div>';
+    return;
+  }
+  try {
+    const arr = JSON.parse(raw);
+    if (!arr.length) { listEl.innerHTML = '<div class="small-muted">No hay inventarios guardados.</div>'; return; }
+
+    // mostrar más reciente primero
+    arr.slice().reverse().forEach(snap => {
+      const wrap = document.createElement('div');
+      wrap.style.borderTop = '1px dashed #eee';
+      wrap.style.padding = '8px 6px';
+      const header = document.createElement('div');
+      header.style.display = 'flex';
+      header.style.alignItems = 'center';
+      header.style.justifyContent = 'space-between';
+      header.innerHTML = `<div style="font-weight:600">${snap.title}</div>`;
+      const actions = document.createElement('div');
+      actions.innerHTML = `<button class="btn" data-id="${snap.id}">Cargar</button>
+                           <button class="btn ghost" data-del-id="${snap.id}">Eliminar</button>`;
+      header.appendChild(actions);
+      wrap.appendChild(header);
+
+      // resumen (lista corta) de filas
+      const rowsHtml = (snap.items || []).map(it => `<div style="font-size:.92rem;color:#444;padding:4px 0;">${it.index || '-'} — ${it.material || '-'} — ${it.cantidad || '0'} ${it.unidad || ''} — Exist: ${it.existencia || '0'}</div>`).join('');
+      const body = document.createElement('div');
+      body.innerHTML = rowsHtml || '<div class="small-muted">Sin filas</div>';
+      wrap.appendChild(body);
+
+      listEl.appendChild(wrap);
+    });
+
+    // attach listeners for cargar / eliminar
+    listEl.querySelectorAll('button[data-id]').forEach(b=>{
+      b.addEventListener('click', ()=> {
+        const id = Number(b.dataset.id);
+        loadSavedInventoryById(id);
+      });
+    });
+    listEl.querySelectorAll('button[data-del-id]').forEach(b=>{
+      b.addEventListener('click', ()=> {
+        const id = Number(b.dataset.delId);
+        if (!confirm('Eliminar este inventario del historial?')) return;
+        deleteSavedInventoryById(id);
+      });
+    });
+  } catch (e) {
+    console.error(e);
+    listEl.innerHTML = '<div class="small-muted">Error leyendo inventarios guardados.</div>';
+  }
+}
+
+function loadSavedInventoryById(id) {
+  const raw = localStorage.getItem('panaderia_inventarios');
+  if (!raw) return alert('No hay historial.');
+  const arr = JSON.parse(raw);
+  const snap = arr.find(s => s.id === id);
+  if (!snap) return alert('Inventario no encontrado.');
+  // cargar en la tabla actual (reemplaza filas actuales)
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  (snap.items || []).forEach((it, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="index">${idx + 1}</td>
+      <td><div class="cell" contenteditable="true" data-placeholder="Harina, azucar etc...">${it.material || ''}</div></td>
+      <td><div class="cell" contenteditable="true" data-placeholder="1,2...10">${it.cantidad || ''}</div></td>
+      <td><div class="cell" contenteditable="true" data-placeholder="Kg, L, piezas">${it.unidad || ''}</div></td>
+      <td><div class="cell" contenteditable="true" data-placeholder="DD/MM/YYYY">${it.fechaCompra || ''}</div></td>
+      <td><div class="cell" contenteditable="true" data-placeholder="DD/MM/YYYY">${it.fechaCaducidad || ''}</div></td>
+      <td><div class="cell" contenteditable="true" data-placeholder="1,2,...10">${it.existencia || ''}</div></td>
+      <td><div class="cell" contenteditable="true" data-placeholder="1,2,...10"></div></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  // actualizar la clave de inventario visible (compatibilidad)
+  localStorage.setItem('panaderia_inventario', JSON.stringify(snap.items || []));
+  showMsg(document.getElementById('prod-msg'), 'Inventario cargado desde historial.');
+}
+
+// eliminar snapshot por id
+function deleteSavedInventoryById(id) {
+  const key = 'panaderia_inventarios';
+  const raw = localStorage.getItem(key);
+  if (!raw) return;
+  const arr = JSON.parse(raw).filter(s => s.id !== id);
+  localStorage.setItem(key, JSON.stringify(arr));
+  renderSavedInventories();
+}
+
+// botones para cargar/limpiar historial
+document.getElementById('loadSavedInv').addEventListener('click', renderSavedInventories);
+document.getElementById('clearSavedInv').addEventListener('click', ()=> {
+  if (!confirm('Borrar todo el historial de inventarios guardados?')) return;
+  localStorage.removeItem('panaderia_inventarios');
+  renderSavedInventories();
+});
+
+// cuando se hace click en "Guardar inventario" también guardamos un snapshot en historial
+document.getElementById('saveInvBtn').addEventListener('click', saveInventarioSnapshot);
+
+// renderizar al inicio si hay guardados
+renderSavedInventories();
+    </script>
+</body>
+</html>

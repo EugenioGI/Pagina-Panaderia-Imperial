@@ -1,0 +1,155 @@
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #fff;
+    color: #111;
+    padding: 18px;
+    display: flex;
+    justify-content: center;
+}
+
+.paper {
+    width: 780px;
+    border: 1px solid #ccc;
+    padding: 18px 22px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+}
+
+.hoja_informacion {
+    margin-top: 10px;
+    margin-left: 550px;
+    text-align: left;
+    display: inline-block;
+    background-color: green; 
+    
+    color: #ffffff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.hoja_informacion:hover {
+    background-color: greenyellow; /* Color al pasar el mouse */
+    color: #000000;
+}
+
+.head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.title {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.meta {
+    border: 1px solid #000;
+    padding: 6px 8px;
+    text-align: center;
+}
+
+.meta div {
+    font-size: 14px;
+}
+
+.meta .label {
+    font-size: 11px;
+    color: #333;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+thead th {
+    border-bottom: 2px solid #000;
+    padding: 6px;
+    text-align: left;
+    font-weight: 600;
+}
+
+tbody td {
+    border-bottom: 1px solid #ddd;
+    padding: 6px;
+    vertical-align: middle;
+}
+
+select,
+input[type="number"],
+input[type="text"] {
+    padding: 6px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.btn {
+    background: #0b8043;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn.ghost {
+    background: #fff;
+    color: #0b8043;
+    border: 1px solid #0b8043;
+}
+
+.remove-btn {
+    background: #c0392b;
+    border: none;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.small {
+    font-size: .85rem;
+    color: #555;
+}
+
+.section-title {
+    margin-top: 14px;
+    font-weight: 700;
+}
+
+.sub-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 8px;
+    margin-bottom: 6px;
+}
+
+.flex-right {
+    margin-left: auto;
+}
+
+/* Estilos para la tabla de inventario */
+.note {
+    margin: 8px 0;
+}
+
+#invBody td {
+    font-size: 0.9em;
+    color: #444;
+}

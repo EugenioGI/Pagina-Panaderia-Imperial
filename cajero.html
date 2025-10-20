@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Cajero - Nota de Remisión</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="cajero.css">
+</head>
+<body>
+    <menu class="topbar">
+    <a class="hoja_informacion" href="informacion_Cajero.html">Informacion</a>
+    </menu>
+    <div class="paper" role="main">
+        <div class="head">
+            <div>
+                <div class="title">NOTA DE REMISIÓN</div>
+            </div>
+            <div>
+                <div class="meta">
+                    <div class="label">DIA / MES / AÑO</div>
+                    <div id="fecha">--/--/----</div>
+                </div>
+                <div style="height:8px;"></div>
+                <div class="meta" style="margin-top:6px;">
+                    <div class="label">No.</div>
+                    <div id="invoiceNo">0</div>
+                </div>
+            </div>
+        </div>
+
+
+        <table aria-label="Detalle de items">
+            <thead>
+                <tr>
+                    <th class="col-cant">Cantidad</th>
+                    <th class="col-art">Tipo de pan</th>
+                    <th class="col-pre right">Precio unitario</th>
+                    <th class="col-imp right">Subtotal</th>
+                    <th style="width:60px"></th>
+                </tr>
+            </thead>
+            <tbody id="itemsBody">
+
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="3" class="right no-wrap">TOTAL $</td>
+                    <td id="totalAmount" class="right">0.00</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="controls">
+            <button id="addRow" class="btn">Agregar fila</button>
+            <button id="generate" class="btn">Generar nota (incrementar No.)</button>
+            <button id="printBtn" class="btn ghost">Imprimir</button>
+            <button id="logoutBtn" class="btn ghost">Cerrar sesión</button>
+        </div>
+
+        <div style="margin-top:10px;" class="small">Cantidad: seleccionable 1–10. Tipo de pan: 3 opciones. Subtotal calculado automáticamente. El número se incrementa cada vez que generas la nota.</div>
+    </div>
+
+    <script type="module">
+        import { getSession, requireUser, logout } from './auth.js';
+
+        // proteger acceso a cajero
+        requireUser('cajero');
+        const s = getSession();
+        // variables y claves
+        const COUNTER_KEY = 'panaderia_invoice_counter';
+        const BODY = document.getElementById('itemsBody');
+        const DATE_EL = document.getElementById('fecha');
+        const NO_EL = document.getElementById('invoiceNo');
+        const TOTAL_EL = document.getElementById('totalAmount');
+
+        // inicializar fecha
+        function setToday(){
+            const d = new Date();
+            const dd = String(d.getDate()).padStart(2,'0');
+            const mm = String(d.getMonth()+1).padStart(2,'0');
+            const yy = d.getFullYear();
+            DATE_EL.textContent = `${dd} / ${mm} / ${yy}`;
+        }
+        setToday();
+
+        // cargar contador
+        function getCounter(){ return parseInt(localStorage.getItem(COUNTER_KEY) || '0', 10); }
+        function setCounter(n){ localStorage.setItem(COUNTER_KEY, String(n)); NO_EL.textContent = n; }
+        // mostrar contador actual al abrir (si es 0, se mostrará 0 hasta generar)
+        NO_EL.textContent = getCounter();
+
+        // utilidades
+        function money(v){ return Number(v || 0).toFixed(2); }
+
+        function recalcRow(row){
+            const qty = parseInt(row.querySelector('.qty').value || '0',10);
+            const price = parseFloat(row.querySelector('.price').value || '0');
+            const subtotal = qty * price;
+            row.querySelector('.subtotal').textContent = money(subtotal);
+            recalcTotal();
+        }
+
+        function recalcTotal(){
+            let total = 0;
+            BODY.querySelectorAll('tr').forEach(r=>{
+                const s = parseFloat(r.querySelector('.subtotal').textContent || '0');
+                total += isNaN(s) ? 0 : s;
+            });
+            TOTAL_EL.textContent = money(total);
+        }
+
+        function createRow(){ 
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>
+                    <select class="qty" aria-label="Cantidad">
+                        ${[...Array(10)].map((_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}
+                    </select>
+                </td>
+                <td>
+                    <select class="product" aria-label="Tipo de pan">
+                        <option value="Baguette">Baguette</option>
+                        <option value="Concha">Concha</option>
+                        <option value="Bolillo">Bolillo</option>
+                    </select>
+                </td>
+                <td class="col-pre right">
+                    <input class="price" type="number" min="0" step="0.01" value="0.00" aria-label="Precio unitario" />
+                </td>
+                <td class="col-imp right">
+                    <span class="subtotal">0.00</span>
+                </td>
+                <td class="right">
+                    <button class="remove-btn" type="button" title="Eliminar">X</button>
+                </td>
+            `;
+            // eventos
+            tr.querySelector('.qty').addEventListener('change', ()=>recalcRow(tr));
+            tr.querySelector('.price').addEventListener('input', ()=>recalcRow(tr));
+            tr.querySelector('.remove-btn').addEventListener('click', ()=>{
+                tr.remove();
+                recalcTotal();
+            });
+            return tr;
+        }
+
+        // add initial 3 empty rows
+        for(let i=0;i<3;i++) BODY.appendChild(createRow());
+
+        document.getElementById('addRow').addEventListener('click', ()=> {
+            BODY.appendChild(createRow());
+            // focus en último precio
+            const last = BODY.querySelector('tr:last-child .price');
+            if(last) last.focus();
+        });
+
+        // Generar nota: incrementa contador y lo muestra
+        document.getElementById('generate').addEventListener('click', ()=>{
+            let c = getCounter();
+            c = c + 1; // incrementar
+            setCounter(c);
+            // formar objeto simple
+            const items = Array.from(BODY.querySelectorAll('tr')).map(r=>({
+                qty: parseInt(r.querySelector('.qty').value,10),
+                product: r.querySelector('.product').value,
+                price: parseFloat(r.querySelector('.price').value || 0),
+                subtotal: parseFloat(r.querySelector('.subtotal').textContent || 0)
+            }));
+            const inv = {
+                no: c,
+                date: DATE_EL.textContent,
+                user: s?.username ?? 'cajero',
+                items,
+                total: parseFloat(TOTAL_EL.textContent || 0),
+                createdAt: Date.now()
+            };
+            // guardar historial simple
+            const histKey = 'panaderia_invoices';
+            const raw = localStorage.getItem(histKey);
+            const arr = raw ? JSON.parse(raw) : [];
+            arr.push(inv);
+            localStorage.setItem(histKey, JSON.stringify(arr));
+            alert('Nota generada. Número: ' + c);
+        });
+
+        // imprimir
+        document.getElementById('printBtn').addEventListener('click', ()=> window.print());
+
+        // logout
+        document.getElementById('logoutBtn').addEventListener('click', ()=> logout());
+
+        // recalcular total si el usuario cambia valores manualmente en filas ya creadas
+        recalcTotal();
+    </script>
+</body>
+</html>

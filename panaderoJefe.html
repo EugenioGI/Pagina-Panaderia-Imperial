@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Panadero - Reporte de Producción</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="panaderoJefe.css">
+</head>
+<body>
+  <!-- Nueva sección de consulta de inventario -->
+  <div class="paper" role="main">
+    <div class="section-title">Consulta de Inventario</div>
+    <div class="note small">Vista de solo lectura del inventario actual</div>
+    <table aria-label="Inventario actual">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Material</th>
+          <th>Cantidad</th>
+          <th>Unidad</th>
+          <th>Fecha compra</th>
+          <th>Fecha caducidad</th>
+          <th>Existencia</th>
+        </tr>
+      </thead>
+      <tbody id="invBody"></tbody>
+    </table>
+    <div style="margin: 12px 0;" class="small">
+      * Esta información se actualiza automáticamente desde el inventario del Jefe
+    </div>
+  </div>
+
+  <div style="height: 24px;"></div>
+
+  <!-- Contenido original -->
+  <div class="paper" role="main">
+    <div class="head">
+      <div><div class="title">REPORTE DE PRODUCCIÓN</div></div>
+      <div>
+        <div class="meta">
+          <div class="label">DIA / MES / AÑO</div>
+          <div id="fecha">--/--/----</div>
+        </div>
+        <div style="height:8px;"></div>
+        <div class="meta" style="margin-top:6px;">
+          <div class="label">No.</div>
+          <div id="reportNo">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla: Producción -->
+           <a class="hoja_informacion" href="informacion_Panadero.html">Informacion</a>
+    <div class="section-title">Producción
+    </div>
+    <div class="sub-controls">
+      <button id="addProdRow" class="btn">Agregar fila (Producción)</button>
+    </div>
+    <table aria-label="Detalle de producción">
+      <thead>
+        <tr>
+          <th>Tipo de pan producido</th>
+          <th>Cantidad producida</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="prodBody"></tbody>
+    </table>
+
+    <!-- Tabla: Materia prima -->
+    <div class="section-title">Materia prima utilizada</div>
+    <div class="sub-controls">
+      <button id="addMatRow" class="btn">Agregar fila (Materia)</button>
+      <div class="flex-right small">Unidad por defecto: Kg</div>
+    </div>
+    <table aria-label="Detalle de materia prima">
+      <thead>
+        <tr>
+          <th>Tipo de materia prima utilizada</th>
+          <th>Unidad</th>
+          <th>Cantidad materia prima utilizada</th>
+          <th>Merma</th>
+          <th>Detalle Merma</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="matBody"></tbody>
+    </table>
+
+    <!-- Nueva sección: Alertas -->
+    <div class="section-title">Alertas</div>
+    <div class="sub-controls" style="flex-direction:column;align-items:stretch;">
+      <textarea id="alertText" placeholder="Escribe una alerta para el Jefe..." style="width:100%;min-height:80px;padding:8px;border:1px solid #bbb;border-radius:4px;"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button id="sendAlert" class="btn">Enviar alerta</button>
+        <button id="clearAlertText" class="btn ghost">Limpiar</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="generate" class="btn">Generar reporte (incrementar No.)</button>
+      <button id="printBtn" class="btn ghost">Imprimir</button>
+      <button id="logoutBtn" class="btn ghost">Cerrar sesión</button>
+    </div>
+
+    <div style="margin-top:10px;" class="small">
+      Las dos tablas se envían dentro del mismo registro: production (items de producción) y materials (items de materia prima). El número se incrementa cada vez que generas el reporte.
+    </div>
+  </div>
+
+  <script type="module">
+    import { getSession, requireUser, logout } from './auth.js';
+
+    requireUser('Panadero');
+    const s = getSession();
+
+    const COUNTER_KEY = 'panaderia_production_counter';
+    const PROD_BODY = document.getElementById('prodBody');
+    const MAT_BODY = document.getElementById('matBody');
+    const DATE_EL = document.getElementById('fecha');
+    const NO_EL = document.getElementById('reportNo');
+
+    function setToday(){
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2,'0');
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const yy = d.getFullYear();
+      DATE_EL.textContent = `${dd} / ${mm} / ${yy}`;
+    }
+    setToday();
+
+    function getCounter(){ return parseInt(localStorage.getItem(COUNTER_KEY) || '0', 10); }
+    function setCounter(n){ localStorage.setItem(COUNTER_KEY, String(n)); NO_EL.textContent = n; }
+    NO_EL.textContent = getCounter();
+
+    function createProdRow(){
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <select class="pan">
+            <option value="Baguette">Baguette</option>
+            <option value="Concha">Concha</option>
+            <option value="Bolillo">Bolillo</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </td>
+        <td><input type="number" min="0" class="cantPan" value="0" /></td>
+        <td><button class="remove-btn" type="button">X</button></td>
+      `;
+      tr.querySelector('.remove-btn').addEventListener('click', ()=> tr.remove());
+      return tr;
+    }
+
+    function createMatRow(){
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="text" class="materia" placeholder="harina, azucar..." /></td>
+        <td>
+          <select class="unidad">
+            <option value="Kg">Kg</option>
+            <option value="g">g</option>
+            <option value="L">L</option>
+            <option value="u">u</option>
+          </select>
+        </td>
+        <td><input type="number" min="0" step="any" class="cantMat" value="0" /></td>
+        <td><input type="number" min="0" step="any" class="merma" value="0" /></td>
+        <td><input type="text" class="detalleMerma" placeholder="detalle..." /></td>
+        <td><button class="remove-btn" type="button">X</button></td>
+      `;
+      tr.querySelector('.remove-btn').addEventListener('click', ()=> tr.remove());
+      return tr;
+    }
+
+    // inicial: 3 filas producción, 1 fila materia
+    for(let i=0;i<3;i++) PROD_BODY.appendChild(createProdRow());
+    MAT_BODY.appendChild(createMatRow());
+
+    document.getElementById('addProdRow').addEventListener('click', ()=> PROD_BODY.appendChild(createProdRow()));
+    document.getElementById('addMatRow').addEventListener('click', ()=> MAT_BODY.appendChild(createMatRow()));
+
+    document.getElementById('generate').addEventListener('click', ()=> {
+      let c = getCounter();
+      c = c + 1;
+      setCounter(c);
+
+      const production = Array.from(PROD_BODY.querySelectorAll('tr')).map(r=>({
+        pan: r.querySelector('.pan').value,
+        cantidadPan: parseInt(r.querySelector('.cantPan').value || 0, 10)
+      }));
+
+      const materials = Array.from(MAT_BODY.querySelectorAll('tr')).map(r=>({
+        materiaPrima: r.querySelector('.materia').value,
+        unidad: r.querySelector('.unidad').value,
+        cantidadMateria: parseFloat(r.querySelector('.cantMat').value || 0),
+        merma: parseFloat(r.querySelector('.merma').value || 0),
+        detalleMerma: r.querySelector('.detalleMerma').value
+      }));
+
+      const report = {
+        no: c,
+        date: DATE_EL.textContent,
+        user: s?.username ?? 'panadero',
+        production,    // array de items de producción
+        materials,     // array de items de materia prima
+        // por compatibilidad con la vista Jefe/export, también expongo items = production
+        items: production.map(it=> ({ pan: it.pan, cantidadPan: it.cantidadPan }) ),
+        createdAt: Date.now()
+      };
+
+      const histKey = 'panaderia_production_reports';
+      const raw = localStorage.getItem(histKey);
+      const arr = raw ? JSON.parse(raw) : [];
+      arr.push(report);
+      localStorage.setItem(histKey, JSON.stringify(arr));
+      alert('Reporte generado. Número: ' + c);
+    });
+
+    document.getElementById('printBtn').addEventListener('click', ()=> window.print());
+    document.getElementById('logoutBtn').addEventListener('click', ()=> logout());
+
+    // --- nuevas funciones para alertas ---
+    const ALERT_KEY = 'panaderia_alerts';
+    document.getElementById('sendAlert').addEventListener('click', ()=> {
+      const txt = document.getElementById('alertText').value.trim();
+      if(!txt){ alert('Escribe el texto de la alerta.'); return; }
+      const raw = localStorage.getItem(ALERT_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      const item = {
+        id: Date.now(),
+        user: s?.username ?? 'panadero',
+        date: DATE_EL.textContent,
+        message: txt
+      };
+      arr.push(item);
+      localStorage.setItem(ALERT_KEY, JSON.stringify(arr));
+      document.getElementById('alertText').value = '';
+      alert('Alerta enviada al Jefe.');
+    });
+    document.getElementById('clearAlertText').addEventListener('click', ()=> {
+      document.getElementById('alertText').value = '';
+    });
+
+    // Cargar inventario desde localStorage
+    function loadInventario() {
+      const invBody = document.getElementById('invBody');
+      const raw = localStorage.getItem('panaderia_inventario');
+      
+      if (!raw) {
+        invBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;">No hay datos de inventario disponibles</td></tr>';
+        return;
+      }
+
+      try {
+        const items = JSON.parse(raw);
+        invBody.innerHTML = items.map(item => `
+          <tr>
+            <td>${item.index || '-'}</td>
+            <td>${item.material || '-'}</td>
+            <td>${item.cantidad || '0'}</td>
+            <td>${item.unidad || '-'}</td>
+            <td>${item.fechaCompra || '-'}</td>
+            <td>${item.fechaCaducidad || '-'}</td>
+            <td>${item.existencia || '0'}</td>
+          </tr>
+        `).join('');
+      } catch(e) {
+        console.error('Error cargando inventario:', e);
+        invBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;">Error cargando datos</td></tr>';
+      }
+    }
+
+    // Cargar inventario al inicio
+    loadInventario();
+  </script>
+</body>
+</html>

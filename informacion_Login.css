@@ -1,0 +1,59 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.menu {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.volver {
+    margin-top: 10px;
+    margin-left: 10px;
+    display: inline-block;
+    background-color: rgb(255, 225, 126); 
+    
+    color: #000000;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.volver:hover {
+    background-color: #b45f04; /* Color al pasar el mouse */
+    color: #ffffff;
+}
+
+.principal_Login {
+    margin: auto;
+    margin-top: 50px;
+    width: 80%;
+    padding: 10px;
+    border: 2px solid black;
+    border-radius: 10px;
+    background-color: #f2f2f2;
+    margin-bottom: 50px;
+}
+
+.principal_Login p {
+    font-size: 15px;
+    margin-top: 10px;
+    margin-left: 15px;
+    line-height: 1.6;
+    text-align: left;
+    padding: 5px;
+    color: #333333;
+    width: 90%;
+}
+
+.principal_Login hr {
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
